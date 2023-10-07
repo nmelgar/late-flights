@@ -11,7 +11,7 @@ The JSON file for this project contains information on delays at 7 airports over
 
 ## Data
 
-[JSON File](https://github.com/byuidatascience/data4missing/raw/master/data-raw/flights_missing/flights_missing.json)
+[JSON File](https://github.com/byuidatascience/data4missing/raw/master/data-raw/flights_missing/flights_missing.json) </br>
 [Information](https://github.com/byuidatascience/data4missing/blob/master/data.md)
 
 ## Questions and Tasks
