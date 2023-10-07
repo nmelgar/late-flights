@@ -1,7 +1,10 @@
 # Late flights and missing data (JSON files)
+<hr>
+
 Data Science Programming project to work with missing data and search for insights about flight delays.
 
 ## Background
+<hr>
 
 Delayed flights are not something most people look forward to. In the best case scenario you may only wait a few extra minutes for the plane to be cleaned. However, those few minutes can stretch into hours if a mechanical issue is discovered or a storm develops. Arriving hours late may result in you missing a connecting flight, job interview, or your best friend’s wedding. </br>
 
@@ -10,11 +13,13 @@ In 2003 the Bureau of Transportation Statistics (BTS) began collecting data on t
 The JSON file for this project contains information on delays at 7 airports over 10 years. Your task is to clean the data, search for insights about flight delays, and communicate your results using the provided template. </br>
 
 ## Data
+<hr>
 
 [JSON File](https://github.com/byuidatascience/data4missing/raw/master/data-raw/flights_missing/flights_missing.json) </br>
 [Information](https://github.com/byuidatascience/data4missing/blob/master/data.md)
 
 ## Questions and Tasks
+<hr>
 
 For Project 1 the answer to each question should include a chart and a written response. The years labels on your charts should not include a comma. At least two of your charts must include reference marks.
 
