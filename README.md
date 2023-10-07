@@ -31,3 +31,15 @@ For Project 1 the answer to each question should include a chart and a written r
     + From April to August, 40% of delayed flights in the NAS category are due to weather. The rest of the months, the proportion rises to 65%.
 - Using the new weather variable calculated above, create a barplot showing the proportion of all flights that are delayed by weather at each airport. Discuss what you learn from this graph.
 - Fix all of the varied missing data types in the data to be consistent (all missing values should be displayed as “NaN”). In your report include one record example (one row) from your new data, in the raw JSON format. Your example should display the “NaN” for at least one missing value.
+
+## Required Technologies
+<hr>
+
++ At least Python 3.10.11
++ Pandas
++ Altair
+
+## Author
+<hr>
+
++ Nefi Melgar (mel16013@byui.edu)
