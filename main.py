@@ -6,10 +6,9 @@ import numpy as np
 from scipy import stats
 
 # %%
-
-# %%
 # url to data
 flights_url = "https://raw.githubusercontent.com/byuidatascience/data4missing/master/data-raw/flights_missing/flights_missing.json"
+
 # read data as JSON file
 flights = pd.read_json(flights_url)
 
@@ -20,11 +19,9 @@ flights.shape
 # %%
 # first and last rows/columns of the data set
 flights
-
 # %%
 # data set column names
 flights.columns
-
 # %%
 # type of data in the data set columns
 flights.info()
@@ -37,6 +34,82 @@ flights.isna()
 # count the missing values in each column
 missing_count = flights.isna().sum()
 missing_count
+
+# %%
+# unique values for airport_name
+flights.airport_name.value_counts()
+
+# %%
+# unique values for airport_code column
+flights.airport_code.value_counts()
+
+# %%
+# this code will assign airport name based on
+# airport codes
+airport_names = [
+    "Atlanta, GA: Hartsfield-Jackson Atlanta International",
+    "Denver, CO: Denver International",
+    "Washington, DC: Washington Dulles International",
+    "Chicago, IL: Chicago O'Hare International",
+    "San Francisco, CA: San Francisco International",
+    "San Diego, CA: San Diego International",
+    "Salt Lake City, UT: Salt Lake City International",
+]
+
+airport_codes = ["ATL", "DEN", "IAD", "ORD", "SAN", "SFO", "SLC"]
+counter = 0
+while counter < flights.shape[0]:
+    if flights.loc[counter, "airport_code"] == airport_codes[0]:
+        flights.at[counter, "airport_name"] = airport_names[0]
+    elif flights.loc[counter, "airport_code"] == airport_codes[1]:
+        flights.at[counter, "airport_name"] = airport_names[1]
+    elif flights.loc[counter, "airport_code"] == airport_codes[2]:
+        flights.at[counter, "airport_name"] = airport_names[2]
+    elif flights.loc[counter, "airport_code"] == airport_codes[3]:
+        flights.at[counter, "airport_name"] = airport_names[3]
+    elif flights.loc[counter, "airport_code"] == airport_codes[4]:
+        flights.at[counter, "airport_name"] = airport_names[4]
+    elif flights.loc[counter, "airport_code"] == airport_codes[5]:
+        flights.at[counter, "airport_name"] = airport_names[5]
+    elif flights.loc[counter, "airport_code"] == airport_codes[6]:
+        flights.at[counter, "airport_name"] = airport_names[6]
+    counter += 1
+
+# %%
+# unique values for airport_name
+flights.airport_name.value_counts()
+
+# %%
+# unique values for airport_code
+flights.airport_code.value_counts()
+
+# %%
+flights.year.value_counts().sum()
+flights.year.mean()
+
+# %%
+# drop columns with missing year, we cannot use mean because 2010 will
+# be too high to follow patterns in the data
+flights = flights.dropna(subset=["year"])
+flights
+
+# %%
+# replace NaN in minutes_delayed_carrier column with the mean value for the column
+mean_minutes_delayed_carrier = flights["minutes_delayed_carrier"].mean()
+flights["minutes_delayed_carrier"].fillna(mean_minutes_delayed_carrier, inplace=True)
+
+# %%
+
+# %%
+# replace all n/a values with NA
+flights["month"] = flights["month"].replace("n/a", pd.NA)
+
+# %%
+flights["month"].fillna(method="ffill", inplace=True)
+flights.month.value_counts()
+
+# %%
+flights
 
 # %%
 # replace n/a with NaN
