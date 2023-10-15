@@ -22,6 +22,7 @@ flights
 # %%
 # data set column names
 flights.columns
+
 # %%
 # type of data in the data set columns
 flights.info()
@@ -99,8 +100,6 @@ mean_minutes_delayed_carrier = flights["minutes_delayed_carrier"].mean()
 flights["minutes_delayed_carrier"].fillna(mean_minutes_delayed_carrier, inplace=True)
 
 # %%
-
-# %%
 # replace all n/a values with NA
 flights["month"] = flights["month"].replace("n/a", pd.NA)
 
@@ -119,6 +118,26 @@ flights
 # %% remove rows with missing values
 # flights = flights.dropna()
 
+#
+data_columns = [
+    "airport_code",
+    "airport_name",
+    "month",
+    "year",
+    "num_of_flights_total",
+    "num_of_delays_carrier",
+    "num_of_delays_late_aircraft",
+    "num_of_delays_nas",
+    "num_of_delays_security",
+    "num_of_delays_weather",
+    "num_of_delays_total",
+    "minutes_delayed_carrier",
+    "minutes_delayed_late_aircraft",
+    "minutes_delayed_nas",
+    "minutes_delayed_security",
+    "minutes_delayed_weather",
+    "minutes_delayed_total",
+]
 # %%
 # QUESTION 1
 
@@ -128,23 +147,43 @@ flights
 # total number of delayed flights, proportion of delayed flights, and
 # average delay time in hours.
 
-worst = flights.groupby("airport_code").agg(
-    count=("airport_code", "size"),
-    minutes=("minutes_delayed_total", np.mean),
-    delays=("num_of_delays_total", np.mean),
+# get total flights for each airport
+flight_totals = flights.groupby("airport_code")["num_of_flights_total"].sum()
+print(flight_totals)
+
+# # get total delays for each airport
+delay_totals = flights.groupby("airport_code")["num_of_delays_total"].sum()
+print(delay_totals)
+
+# %%
+# get minutes delay time in hours
+delay_totals_minutes = flights.groupby("airport_code")["minutes_delayed_total"].sum()
+print(delay_totals_minutes)
+delay_totals_hours = delay_totals_minutes / 60
+print(delay_totals_hours)
+
+# %%
+# get a
+
+delay_proportion = (delay_totals * 100) / flight_totals
+# create data frame with the information about delays
+worst_df = pd.DataFrame(
+    {
+        "Airport Code": flight_totals.index,
+        "Total Flights": flight_totals.values,
+        "Total Delays": delay_totals.values,
+        "Delay proportion": delay_proportion,
+    }
 )
 
-worst_base = alt.Chart(worst).encode(
-    x=alt.X("minutes"),
-    y=alt.Y("delays"),
-    color=alt.Color("airport_code:N"),
-)
+# chart = (
+#     (alt.Chart(worst_df))
+#     .encode(x=alt.X("Total Delays"), y=alt.Y("Total Flights"))
+#     .mark_bar()
+# )
 
-chart = (
-    worst_base.mark_point()
-    + worst_base.transform_loess("minutes", "delays").mark_line()
-)
-chart
+# chart
+
 # %%
 # QUESTION 2
 
