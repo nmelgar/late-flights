@@ -65,13 +65,10 @@ while counter < flights.shape[0]:
 # %%
 # ***clean month column******
 flights["month"].value_counts()
-# %%
 # replace all n/a values with NA
 flights["month"] = flights["month"].replace("n/a", pd.NA)
-# %%
 # check for missing values
 flights["month"].isna().value_counts()
-# %%
 # The "ffill" method fills in missing values by forward-filling, which means
 # that it uses the last known value to fill in subsequent missing values.
 flights["month"].fillna(method="ffill", inplace=True)
@@ -86,14 +83,45 @@ flights["num_of_delays_carrier"].value_counts()
 
 delays_subset = flights["num_of_delays_carrier"].replace("1500+", pd.NA)
 delays_subset.dropna()
-delays_subset.value_counts()
+# convert column to numeric values and get the mean
+delays_subset_numeric = pd.to_numeric(delays_subset, errors="coerce")
+mean_delay = round(delays_subset_numeric.mean())
+# add the mean of the column to replace those cells with a 1500+ value
+flights["num_of_delays_carrier"] = flights["num_of_delays_carrier"].replace(
+    "1500+", mean_delay
+)
+
 # %%
 # *****clean num_of_delays_late_aircraft column******
-
+flights["num_of_delays_late_aircraft"].value_counts()
+delays_late_subset = flights["num_of_delays_late_aircraft"].replace("-999", pd.NA)
+delays_late_subset.dropna()
+# convert column to numeric values and get the mean
+delays_late_subset_numeric = pd.to_numeric(delays_late_subset, errors="coerce")
+mean_delays_late = round(delays_late_subset_numeric.mean())
+# add the mean of the column to replace those cells with a -999 value
+flights["num_of_delays_late_aircraft"] = flights["num_of_delays_late_aircraft"].replace(
+    -999, mean_delays_late
+)
 
 # %%
 # *****clean minutes_delayed_Carrier column******
+flights["minutes_delayed_carrier"].value_counts()
+min_delayed_carrier_mean = round(flights["minutes_delayed_carrier"].mean())
+flights["minutes_delayed_carrier"].fillna(min_delayed_carrier_mean, inplace=True)
 
 
 # %%
 # *****clean minutes_delayed_nas column******
+flights["minutes_delayed_nas"].isna().value_counts()
+mins_delayed_nas_subset = flights["minutes_delayed_nas"].replace("-999", pd.NA)
+mins_delayed_nas_subset.dropna()
+mins_delayed_nas_mean = round(mins_delayed_nas_subset.mean())
+# add the mean of the column to replace those cells with a -999 value
+flights["minutes_delayed_nas"] = flights["minutes_delayed_nas"].replace(
+    -999, mins_delayed_nas_mean
+)
+flights["minutes_delayed_nas"].fillna(mins_delayed_nas_mean, inplace=True)
+
+
+# %%
