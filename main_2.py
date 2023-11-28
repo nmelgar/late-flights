@@ -9,7 +9,6 @@ from scipy import stats
 # url to data
 flights_url = "https://raw.githubusercontent.com/byuidatascience/data4missing/master/data-raw/flights_missing/flights_missing.json"
 
-# %%
 # read data as JSON file
 flights = pd.read_json(flights_url)
 
@@ -125,3 +124,79 @@ flights["minutes_delayed_nas"].fillna(mins_delayed_nas_mean, inplace=True)
 
 
 # %%
+# QUESTION 1
+
+# Which airport has the worst delays? Discuss the metric you chose, and why
+# you chose it to determine the “worst” airport. Your answer should include
+# a summary table that lists (for each airport) the total number of flights,
+# total number of delayed flights, proportion of delayed flights, and
+# average delay time in hours.
+
+# get total flights for each airport
+flight_totals = flights.groupby("airport_code")["num_of_flights_total"].sum()
+
+# get total delays for each airport
+delayed_totals = flights.groupby("airport_code")["num_of_delays_total"].sum()
+
+# get proportion of delayed flights
+delayed_proportion = delayed_totals / flight_totals
+
+# get minutes delay time in hours
+delay_totals_minutes = flights.groupby("airport_code")["minutes_delayed_total"].sum()
+delay_totals_hours = round(delay_totals_minutes / 60, 2)
+
+# create the worst airport data frame
+worst_df = pd.DataFrame(
+    {
+        "AirportCode": flight_totals.index,
+        "TotalFlights": flight_totals,
+        "TotalDelays": delayed_totals,
+        "DelayProportion": delayed_proportion,
+        "DelayTime(Hours)": delay_totals_hours,
+    }
+)
+
+worst_df = worst_df.sort_values(by='DelayTime(Hours)', ascending=False)
+
+# print(worst_df)
+
+# %%
+# QUESTION 2
+
+# What is the best month to fly if you want to avoid delays of any length?
+# Discuss the metric you chose and why you chose it to calculate your answer.
+# Include one chart to help support your answer, with the x-axis ordered by month.
+# (To answer this question, you will need to remove any rows that are missing
+#  the Month variable.)
+flights
+
+# %%
+# QUESTION 3
+
+# According to the BTS website, the “Weather” category only accounts for severe
+# weather delays. Mild weather delays are not counted in the “Weather” category,
+# but are actually included in both the “NAS” and “Late-Arriving Aircraft” categories.
+# Your job is to create a new column that calculates the total number of flights
+# delayed by weather (both severe and mild). You will need to replace all the
+# missing values in the Late Aircraft variable with the mean. Show your work
+# by printing the first 5 rows of data in a table. Use these three rules for
+# your calculations:__
+
+#     100% of delayed flights in the Weather category are due to weather
+#     30% of all delayed flights in the Late-Arriving category are due to weather.
+#     From April to August, 40% of delayed flights in the NAS category are due to weather. The rest of the months, the proportion rises to 65%.
+
+# %%
+#  QUESTION 4
+
+# Using the new weather variable calculated above, create a barplot showing the
+# proportion of all flights that are delayed by weather at each airport. Discuss
+# what you learn from this graph.
+
+# %%
+# QUESTION 5
+
+# Fix all of the varied missing data types in the data to be consistent (all missing
+# values should be displayed as “NaN”). In your report include one record example
+# (one row) from your new data, in the raw JSON format. Your example should display
+# the “NaN” for at least one missing value.__
