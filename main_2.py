@@ -156,7 +156,7 @@ worst_df = pd.DataFrame(
     }
 )
 
-worst_df = worst_df.sort_values(by='DelayTime(Hours)', ascending=False)
+worst_df = worst_df.sort_values(by="DelayTime(Hours)", ascending=False)
 
 # print(worst_df)
 
@@ -168,8 +168,32 @@ worst_df = worst_df.sort_values(by='DelayTime(Hours)', ascending=False)
 # Include one chart to help support your answer, with the x-axis ordered by month.
 # (To answer this question, you will need to remove any rows that are missing
 #  the Month variable.)
-flights
 
+# average delay time per each month, reset index and convert to dataframe
+flights_month = (
+    flights.groupby("month")["minutes_delayed_total"].mean().round(2).reset_index()
+)
+
+# flights_month = flights_month.sort_values(ascending=False)
+
+max_delay = flights_month["minutes_delayed_total"].max()
+min_delay = flights_month["minutes_delayed_total"].min()
+
+chart = (
+    alt.Chart(flights_month)
+    .mark_point()
+    .encode(
+        y=alt.Y(
+            "minutes_delayed_total:Q",
+            title="Average Minutes",
+            scale=alt.Scale(domain=[(min_delay - 15000), (max_delay + 15000)]),
+        ),
+        x=alt.X("month:N", title="Month"),
+    )
+    .properties(title="Average time (minutes) by month")
+)
+
+chart
 # %%
 # QUESTION 3
 
@@ -183,9 +207,28 @@ flights
 # your calculations:__
 
 #     100% of delayed flights in the Weather category are due to weather
+weather_100 = flights["num_of_delays_weather"]
 #     30% of all delayed flights in the Late-Arriving category are due to weather.
-#     From April to August, 40% of delayed flights in the NAS category are due to weather. The rest of the months, the proportion rises to 65%.
+weather_30 = flights["num_of_delays_late_aircraft"].sample(frac=0.3)
+#     From April to August, 40% of delayed flights in the NAS category are due to weather.
+#     The rest of the months, the proportion rises to 65%.
+months_40 = ["April", "May", "June", "July", "August"]
+months_65 = [
+    "January",
+    "February",
+    "March",
+    "September",
+    "October",
+    "November",
+    "December",
+]
+df_40 = flights.query(f"month in @months_40")
+weather_40 = df_40["num_of_delays_nas"].sample(frac=0.4)
 
+df_65 = flights.query(f"month in @months_65")
+weather_65 = df_65["num_of_delays_nas"].sample(frac=0.65)
+
+print(flights)
 # %%
 #  QUESTION 4
 
