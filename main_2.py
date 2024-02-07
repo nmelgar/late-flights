@@ -2,6 +2,8 @@
 # import the usual libraries
 import pandas as pd
 import altair as alt
+import plotly.express as px
+import plotly.graph_objects as go
 import numpy as np
 from scipy import stats
 
@@ -14,6 +16,9 @@ flights = pd.read_json(flights_url)
 
 # %%
 flights
+
+# %%
+print(flights.isnull().sum())
 
 # %%
 # check for missing values
@@ -123,8 +128,14 @@ flights["minutes_delayed_nas"] = flights["minutes_delayed_nas"].replace(
 flights["minutes_delayed_nas"].fillna(mins_delayed_nas_mean, inplace=True)
 
 
-# %%
 # QUESTION 1
+# Fix all of the varied missing data types in the data to be consistent
+# (all missing values should be displayed as “NaN”). In your report include
+#  one record example (one row) from your new data, in the raw JSON format.
+#  Your example should display the “NaN” for at least one missing value.__
+
+# %%
+# QUESTION 2
 
 # Which airport has the worst delays? Discuss the metric you chose, and why
 # you chose it to determine the “worst” airport. Your answer should include
@@ -148,7 +159,7 @@ delay_totals_hours = round(delay_totals_minutes / 60, 2)
 # create the worst airport data frame
 worst_df = pd.DataFrame(
     {
-        "AirportCode": flight_totals.index,
+        # "AirportCode": flight_totals.index,
         "TotalFlights": flight_totals,
         "TotalDelays": delayed_totals,
         "DelayProportion": delayed_proportion,
@@ -158,10 +169,12 @@ worst_df = pd.DataFrame(
 
 worst_df = worst_df.sort_values(by="DelayTime(Hours)", ascending=False)
 
+worst_df
+
 # print(worst_df)
 
 # %%
-# QUESTION 2
+# QUESTION 3
 
 # What is the best month to fly if you want to avoid delays of any length?
 # Discuss the metric you chose and why you chose it to calculate your answer.
@@ -195,7 +208,7 @@ chart = (
 
 chart
 # %%
-# QUESTION 3
+# QUESTION 4
 
 # According to the BTS website, the “Weather” category only accounts for severe
 # weather delays. Mild weather delays are not counted in the “Weather” category,
@@ -228,18 +241,14 @@ weather_40 = df_40["num_of_delays_nas"].sample(frac=0.4)
 df_65 = flights.query(f"month in @months_65")
 weather_65 = df_65["num_of_delays_nas"].sample(frac=0.65)
 
-print(flights)
+weather_delays_total = weather_100 + weather_30 + weather_40 + weather_65
+
+# flights["total_weather_delays"] = weather_delays_total
+
+print(weather_delays_total)
 # %%
-#  QUESTION 4
+#  QUESTION 5
 
 # Using the new weather variable calculated above, create a barplot showing the
 # proportion of all flights that are delayed by weather at each airport. Discuss
 # what you learn from this graph.
-
-# %%
-# QUESTION 5
-
-# Fix all of the varied missing data types in the data to be consistent (all missing
-# values should be displayed as “NaN”). In your report include one record example
-# (one row) from your new data, in the raw JSON format. Your example should display
-# the “NaN” for at least one missing value.__
