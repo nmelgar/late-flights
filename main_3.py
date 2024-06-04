@@ -15,33 +15,28 @@ flights_url = "https://raw.githubusercontent.com/byuidatascience/data4missing/ma
 flights = pd.read_json(flights_url)
 
 # %%
-# flights
+# QUESTION 1
+# Fix all of the varied missing data types in the data to be consistent
+# (all missing values should be displayed as “NaN”). In your report include
+# one record example (one row) from your new data, in the raw JSON format.
+# Your example should display the “NaN” for at least one missing value.__
+
+# ***fill missing values to display NaN***
+# run this cell and avoid all the other cleansing for missing values in general
+missing_values = [None, "NA", "N/A", "na", "n/a", "null", "", " ", np.nan]
+flights.replace(missing_values, np.nan, inplace=True)
+
+flights.tail()
 
 # %%
-# check for null data
-print(flights.isnull().sum())
+# IMPROVED CLEANSING
+# Improve the cleansing by using different techniques
+# ***call flights again to clean it deeper***
+flights = pd.read_json(flights_url)
 
+# CLEANG COLUMN BY COLUMN
 # %%
-# check for missing values
-flights.isna()
-
-# %%
-# count n/a values in each column
-missing_count = flights.isna().sum()
-missing_count
-
-# %%
-# count empty string value in each column
-empty_count = (flights == "").sum()
-print(empty_count)
-
-#%%
-# count NaN
-# nan_count = (flights == "NaN").sum()
-# print(nan_count)
-
-# %%
-# ***clean airport_name column******
+# ***clean airport_name column***
 # this code will assign airport name based on airport codes
 airport_names = [
     "Atlanta, GA: Hartsfield-Jackson Atlanta International",
@@ -73,7 +68,7 @@ while counter < flights.shape[0]:
     counter += 1
 
 # %%
-# ***clean month column******
+# ***clean month column***
 flights["month"].value_counts()
 # replace all n/a values with NA
 flights["month"] = flights["month"].replace("n/a", pd.NA)
@@ -85,13 +80,12 @@ flights["month"].isna().value_counts()
 flights["month"].fillna(method="ffill", inplace=True)
 
 # %%
-# *****clean year column******
+# ***clean year column***
 flights["year"].fillna(method="ffill", inplace=True)
 
 # %%
-# *****clean num_of_delays_carrier column******
+# ***clean num_of_delays_carrier column***
 flights["num_of_delays_carrier"].value_counts()
-
 delays_subset = flights["num_of_delays_carrier"].replace("1500+", pd.NA)
 delays_subset.dropna()
 # convert column to numeric values and get the mean
@@ -103,7 +97,7 @@ flights["num_of_delays_carrier"] = flights["num_of_delays_carrier"].replace(
 )
 
 # %%
-# *****clean num_of_delays_late_aircraft column******
+# ***clean num_of_delays_late_aircraft column***
 flights["num_of_delays_late_aircraft"].value_counts()
 delays_late_subset = flights["num_of_delays_late_aircraft"].replace("-999", pd.NA)
 delays_late_subset.dropna()
@@ -116,14 +110,13 @@ flights["num_of_delays_late_aircraft"] = flights["num_of_delays_late_aircraft"].
 )
 
 # %%
-# *****clean minutes_delayed_Carrier column******
+# ***clean minutes_delayed_Carrier column***
 flights["minutes_delayed_carrier"].value_counts()
 min_delayed_carrier_mean = round(flights["minutes_delayed_carrier"].mean())
 flights["minutes_delayed_carrier"].fillna(min_delayed_carrier_mean, inplace=True)
 
-
 # %%
-# *****clean minutes_delayed_nas column******
+# ***clean minutes_delayed_nas column***
 flights["minutes_delayed_nas"].isna().value_counts()
 mins_delayed_nas_subset = flights["minutes_delayed_nas"].replace("-999", pd.NA)
 mins_delayed_nas_subset.dropna()
@@ -134,12 +127,15 @@ flights["minutes_delayed_nas"] = flights["minutes_delayed_nas"].replace(
 )
 flights["minutes_delayed_nas"].fillna(mins_delayed_nas_mean, inplace=True)
 
+# %%
+# ***check if there's any NaN value in the df***
+has_nan = flights.isnull().any().any()
+print("Does the DataFrame have any NaN values?", has_nan)
 
-# QUESTION 1
-# Fix all of the varied missing data types in the data to be consistent
-# (all missing values should be displayed as “NaN”). In your report include
-#  one record example (one row) from your new data, in the raw JSON format.
-#  Your example should display the “NaN” for at least one missing value.__
+# %%
+# ***check if there's any NaN values in the df using columns***
+nan_columns = flights.isnull().any()
+print("Columns with NaN values:\n", nan_columns)
 
 # %%
 # QUESTION 2
@@ -178,8 +174,6 @@ worst_df = worst_df.sort_values(by="DelayTime(Hours)", ascending=False)
 
 worst_df
 
-# print(worst_df)
-
 # %%
 # QUESTION 3
 
@@ -199,63 +193,14 @@ flights_month = (
 max_delay = flights_month["minutes_delayed_total"].max()
 min_delay = flights_month["minutes_delayed_total"].min()
 
-chart = (
-    alt.Chart(flights_month)
-    .mark_point()
-    .encode(
-        y=alt.Y(
-            "minutes_delayed_total:Q",
-            title="Average Minutes",
-            scale=alt.Scale(domain=[(min_delay - 15000), (max_delay + 15000)]),
-        ),
-        x=alt.X("month:N", title="Month"),
-    )
-    .properties(title="Average time (minutes) by month")
+fig = px.scatter(
+    flights_month,
+    x="month",
+    y="minutes_delayed_total",
+    title="Avg. delay time (mins) by month (2005-2015)",
+    labels={"minutes_delayed_total": "Average Minutes", "month": "Month"},
 )
 
-chart
-# %%
-# QUESTION 4
-
-# According to the BTS website, the “Weather” category only accounts for severe
-# weather delays. Mild weather delays are not counted in the “Weather” category,
-# but are actually included in both the “NAS” and “Late-Arriving Aircraft” categories.
-# Your job is to create a new column that calculates the total number of flights
-# delayed by weather (both severe and mild). You will need to replace all the
-# missing values in the Late Aircraft variable with the mean. Show your work
-# by printing the first 5 rows of data in a table. Use these three rules for
-# your calculations:__
-
-#     100% of delayed flights in the Weather category are due to weather
-weather_100 = flights["num_of_delays_weather"]
-#     30% of all delayed flights in the Late-Arriving category are due to weather.
-weather_30 = flights["num_of_delays_late_aircraft"].sample(frac=0.3)
-#     From April to August, 40% of delayed flights in the NAS category are due to weather.
-#     The rest of the months, the proportion rises to 65%.
-months_40 = ["April", "May", "June", "July", "August"]
-months_65 = [
-    "January",
-    "February",
-    "March",
-    "September",
-    "October",
-    "November",
-    "December",
-]
-df_40 = flights.query(f"month in @months_40")
-weather_40 = df_40["num_of_delays_nas"].sample(frac=0.4)
-
-df_65 = flights.query(f"month in @months_65")
-weather_65 = df_65["num_of_delays_nas"].sample(frac=0.65)
-
-weather_delays_total = weather_100 + weather_30 + weather_40 + weather_65
-
-# flights["total_weather_delays"] = weather_delays_total
-
-print(weather_delays_total)
-# %%
-#  QUESTION 5
-
-# Using the new weather variable calculated above, create a barplot showing the
-# proportion of all flights that are delayed by weather at each airport. Discuss
-# what you learn from this graph.
+# format amounts to show (,) and round them, display each 30,000
+fig.update_yaxes(tickformat=",.0f", dtick=30000)
+fig.show()
