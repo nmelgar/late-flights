@@ -204,3 +204,120 @@ fig = px.scatter(
 # format amounts to show (,) and round them, display each 30,000
 fig.update_yaxes(tickformat=",.0f", dtick=30000)
 fig.show()
+
+# %%
+# QUESTION 4
+
+# According to the BTS website, the “Weather” category only accounts for severe
+# weather delays. Mild weather delays are not counted in the “Weather” category,
+# but are actually included in both the “NAS” and “Late-Arriving Aircraft” categories.
+# Your job is to create a new column that calculates the total number of flights
+# delayed by weather (both severe and mild). You will need to replace all the
+# missing values in the Late Aircraft variable with the mean. Show your work
+# by printing the first 5 rows of data in a table. Use these three rules for
+# your calculations:__
+
+# total flights for each airport
+flight_totals = flights.groupby("airport_code")["num_of_flights_total"].sum()
+
+# total delays for each airport
+delayed_totals = flights.groupby("airport_code")["num_of_delays_total"].sum()
+
+# RULE 1: 100% of delayed flights in the Weather category are due to weather
+weather_100 = flights.groupby("airport_code")["num_of_delays_weather"].sum()
+
+# RULE 2: 30% of all delayed flights in the Late-Arriving category are due to weather
+sample_flights_30 = flights.sample(frac=0.3, random_state=1)
+weather_30 = sample_flights_30.groupby("airport_code")[
+    "num_of_delays_late_aircraft"
+].sum()
+
+# RULE 3: From April to August, 40% of delayed flights in the NAS category are due to weather.
+months_40 = ["April", "May", "June", "July", "August"]
+months_65 = [
+    "January",
+    "February",
+    "March",
+    "September",
+    "October",
+    "November",
+    "December",
+]
+
+df_40 = flights.query(f"month in @months_40")
+sample_flights_40 = df_40.sample(frac=0.4, random_state=1)
+weather_40 = sample_flights_40.groupby("airport_code")["num_of_delays_nas"].sum()
+
+# RULE 3.1: The rest of the months, the proportion rises to 65%
+
+df_65 = flights.query(f"month in @months_65")
+sample_flights_65 = df_65.sample(frac=0.65, random_state=1)
+weather_65 = sample_flights_65.groupby("airport_code")["num_of_delays_nas"].sum()
+
+
+# dataframe to display the results
+weather_df = pd.DataFrame(
+    {
+        "TotalFlights": flight_totals,
+        "TotalDelays": delayed_totals,
+        "WeatherDelay": weather_100,
+        "DelaysLateAircraft": weather_30,
+        "DelayNAS40": weather_40,
+        "DelayNAS65": weather_65,
+    }
+).reset_index()
+
+weather_df
+
+# %%
+# QUESTION 5
+
+# Using the new weather variable calculated above, create a barplot showing the proportion
+# of all flights that are delayed by weather at each airport. Describe what you learn from
+# this graph.
+
+# %%
+counter_weather = 0
+proportion_delays_totals = []
+airtport_codes_weather = []
+while counter_weather < len(weather_df["TotalFlights"]):
+
+    # make the sum for the rows
+    rule1_percent = weather_df.WeatherDelay[counter_weather]
+    rule2_percent = weather_df.DelaysLateAircraft[counter_weather]
+    rule3_percent = weather_df.DelayNAS40[counter_weather]
+    rule31_percent = weather_df.DelayNAS65[counter_weather]
+
+    # perform the sum of each cell of the row
+    row_total = rule1_percent + rule2_percent + rule3_percent + rule31_percent
+    # print(row_total)
+
+    # get elements of the total delays due of weather column
+    flight_totals_weather = weather_df.TotalDelays[counter_weather]
+    # print(flight_totals_weather)
+
+    # get proportion of delayed flights due of weather and append the
+    # proportion to the list proportion delays total
+    delayed_proportion_weather = (row_total / flight_totals_weather) * 100
+    delayed_proportion_weather = round(delayed_proportion_weather, 1)
+    # print(delayed_proportion_weather)
+    proportion_delays_totals.append(delayed_proportion_weather)
+
+    # get airport codes and append them to the list of airport codes
+    airport_code_weather = weather_df.airport_code[counter_weather]
+    airtport_codes_weather.append(airport_code_weather)
+
+    # for total in proportion_delays_totals:
+    #     print(total)
+
+    # for airportcode in airtport_codes_weather:
+    #     print(airportcode)
+    weather_proportions_data = {
+        "airport_code": airtport_codes_weather,
+        "proportion": proportion_delays_totals,
+    }
+    proportions_weather_df = pd.DataFrame(weather_proportions_data)
+
+    counter_weather += 1
+print(proportions_weather_df)
+# %%
