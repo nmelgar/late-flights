@@ -1,0 +1,263 @@
+---
+title: "Client Report - What's in a name?"
+subtitle: "Course DS 250"
+author: "Nefi Melgar"
+format:
+  html:
+    self-contained: true
+    page-layout: full
+    title-block-banner: true
+    toc: true
+    toc-depth: 3
+    toc-location: body
+    number-sections: false
+    html-math-method: katex
+    code-fold: true
+    code-summary: "Show the code"
+    code-overflow: wrap
+    code-copy: hover
+    code-tools:
+        source: false
+        toggle: true
+        caption: See code
+execute: 
+  warning: false
+    
+---
+
+```{python}
+#| label: libraries
+#| include: false
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+import datetime
+```
+
+
+## Elevator pitch
+
+_Names as ways to identify individuals have been used through world's history. This project involves data exploration, visualization, and interpretation to gain insights into the trends and patterns related to different names over time. Is Brittany a name for old or young ladies? Has Luke Skywalker from Star Wars influeced the names of a generation? Let's dive in to the results._
+
+```{python}
+#| label: project data
+#| code-summary: Read and format project data
+names_url = "https://raw.githubusercontent.com/byuidatascience/data4names/master/data-raw/names_year/names_year.csv"
+names = pd.read_csv(names_url)
+```
+
+## QUESTION 1
+
+__HOW DOES YOUR NAME AT YOUR BIRTH YEAR COMPARE TO ITS USE HISTORICALLY?__
+
+_My name was not listed in the data set. So I took my eldest brother's name which is Matthew, he was born in 1993. Around 1940, Matthew started to increase in popularity, it took 50 years to reach the highest point with more than 35,000 Matthews.._
+_Once the highest point was reached, the name had a decrease in popularity, before 2000 it shew a spark of popularity, but the dicrease continued.._
+
+```{python}
+#| label: Q1
+#| code-summary: Code to analyze Matthew name through the years
+
+# create dataframe only for "Matthew" name
+matthew_data = names.query('name == "Matthew"')
+
+# filter data
+person_name = "Matthew"
+year_range = "year >= 1910 and year <= 2015"
+matthew_data = names.query(f"name == '{person_name}' and {year_range}")
+
+# specific year for his born
+born_year = 1993
+born_year_data = matthew_data.query(f"year == {born_year}")
+specific_year = born_year_data["year"].values
+totals_specific_year = born_year_data["Total"].values
+
+# create matthew line chart through the years
+mat_chart = px.line(
+    matthew_data,
+    x="year",
+    y="Total",
+    labels={"year": "Year"},
+    title="Matthew name through the years",
+)
+
+# add mark to highligth the year when he was born
+mat_chart.add_trace(
+    go.Scatter(
+        x=specific_year,
+        y=totals_specific_year,
+        mode="markers",
+        marker_size=10,
+        name="1993",
+    )
+)
+mat_chart.show()
+
+```
+
+_1993 year is highlighted as the year my brother born.._
+
+
+```{python}
+# | label: Q1 table
+# | code-summary: Table example
+# | tbl-cap: "Sample of the first years for Matthew"
+# | tbl-cap-location: top
+print(matthew_data.head(5).filter(["name", "year", "Total"]).to_markdown(index=False))
+```
+
+## QUESTION 2
+
+__IF YOU TALKED TO SOMEONE NAMED BRITTANY ON THE PHONE, WHAT IS YOUR GUESS OF HIS OR HER AGE? WHAT AGES WOULD YOU NOT GUESS??__
+
+_type your results and analysis here_
+
+```{python}
+#| label: Q2
+#| code-summary: Code to analyze Brittany's data
+# get data and filter it by name
+brittany_data = names.query('name == "Brittany"')
+current_year = datetime.datetime.now().year
+
+# create a copy of the data to avoid the SettingWithCopyWarning:
+brittany_data_copy = brittany_data.copy()
+brittany_data_copy["currentAge"] = current_year - brittany_data_copy["year"]
+
+# create brittany scatter
+brittany_chart = px.scatter(
+    brittany_data_copy,
+    x="currentAge",
+    y="Total",
+    labels={
+        "currentAge": "Current Age",
+    },
+    title="Brittany's ages in the US",
+)
+brittany_chart.show()
+
+
+```
+
+_Using 2024 as year of reference, Brittany was a popular name many years ago.._
+
+
+```{python}
+# | label: Q2 table
+# | code-summary: Table example
+# | tbl-cap: "Sample of the first years for Brittany"
+# | tbl-cap-location: top
+# Include and execute your code here
+print(brittany_data.head(5).filter(["name", "year", "Total"]).to_markdown(index=False))
+```
+
+## QUESTION 3
+
+__MARY, MARTHA, PETER, AND PAUL ARE ALL CHRISTIAN NAMES. FROM 1920 - 2000, COMPARE THE NAME USAGE OF EACH OF THE FOUR NAMES. WHAT TRENDS DO YOU NOTICE??__
+
+_These names had an interesting increase in popularity around 1940's, but for the 1960's all of them were in their way to decrase in popularity. Mary shows the highest amount of decrease, in around 20 years it went from 45,000 to 15,000, a loss of 30,000, a considerable amount compared to the other names._
+
+```{python}
+#| label: Q3
+# | code-summary: Code to analyze Chrstian names
+# create copy of the data with specified names and year range
+list_names = ["Mary", "Martha", "Peter", "Paul"]
+year_names = "year >= 1920 and year <= 2000"
+christian_names_data = names.query(f"name in @list_names and {year_names}")
+
+# create line chart to display names between 1920 and 2000
+christian_names_chart = px.line(
+    christian_names_data,
+    x="year",
+    y="Total",
+    color="name",
+    labels={
+        "year": "Year",
+        "name": "Name",
+    },
+    title="Christian Names Between 1920-2000",
+)
+christian_names_chart.show()
+
+```
+
+_"Mary" shows an interesting decrease before 1960._
+
+```{python}
+# | label: Q3 table
+# | code-summary: Table for Christian names
+# | tbl-cap: "Sample of the first rows of Christian names"
+# | tbl-cap-location: top
+print(
+    christian_names_data.head(5)
+    .filter(["name", "year", "Total"])
+    .to_markdown(index=False)
+)
+```
+
+## QUESTION 4
+
+__THINK OF A UNIQUE NAME FROM A FAMOUS MOVIE. PLOT THE USAGE OF THAT NAME AND SEE HOW CHANGES LINE UP WITH THE MOVIE RELEASE. DOES IT LOOK LIKE THE MOVIE HAD AN EFFECT ON USAGE?__
+
+_Star Wars is a popular series of movies, streamings, videogames and more. Luke Skywalker was the main character for the movies IV (1977), V (1980) and VI (1983). Although "Luke" name started to grow in popularity around 1970, from 1977 to 1980 it went from 1235 to 3108 a growth of 252% in just 3 years, after that the name's popularity had it's ups and downs._
+
+```{python}
+# | label: Q4
+# | code-summary: Code to analyze Luke name from Star Wars
+# choose name, and year range for the star wars movies, "luke" as the name
+movie_name = "Luke"
+year_range = "year >= 1960 and year <= 1990"
+movie_name_data = names.query(f"name == '{movie_name}' and {year_range}")
+
+# create line chart for luke name through the years
+luke_name_chart = px.line(
+    movie_name_data,
+    x="year",
+    y="Total",
+    labels={"year": "Year"},
+    title="Luke Skywalker impact on names of the people",
+)
+
+# data to display movies released data, movies iv, v and vi
+movie_release_year = [1977, 1980, 1983]
+movie_release_data = names.query(
+    f"year in @movie_release_year and name == '{movie_name}'"
+)
+totals_movie_year = movie_release_data["Total"].values
+
+# add markers for the years when the moview IV to VI were released
+luke_name_chart.add_trace(
+    go.Scatter(
+        x=movie_release_year,
+        y=totals_movie_year,
+        mode="markers",
+        marker_size=8,
+        marker_symbol="star",
+        marker_color="red",
+        name="Years when Star Wars movies were released (IV - VI)",
+    )
+)
+
+# change the layoyt so the legend show at bottom of the plot
+luke_name_chart.update_layout(
+    legend=dict(
+        orientation="h",
+        yanchor="bottom",
+        y=-0.2,
+    )
+)
+luke_name_chart.show()
+```
+
+_Release year for movies IV, V and VI are highlighted.._
+
+```{python}
+# | label: Q4 table
+# | code-summary: Table of years
+# | tbl-cap: "Release date tables for moview IV, V and VI"
+# | tbl-cap-location: top
+print(
+    movie_release_data.head(5)
+    .filter(["name", "year", "Total"])
+    .to_markdown(index=False)
+)
+```
+

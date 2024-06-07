@@ -51,6 +51,7 @@ airport_names = [
 airport_codes = ["ATL", "DEN", "IAD", "ORD", "SAN", "SFO", "SLC"]
 counter = 0
 while counter < flights.shape[0]:
+    # while counter < len(airport_codes):
     if flights.loc[counter, "airport_code"] == airport_codes[0]:
         flights.at[counter, "airport_name"] = airport_names[0]
     elif flights.loc[counter, "airport_code"] == airport_codes[1]:
@@ -153,7 +154,8 @@ flight_totals = flights.groupby("airport_code")["num_of_flights_total"].sum()
 delayed_totals = flights.groupby("airport_code")["num_of_delays_total"].sum()
 
 # get proportion of delayed flights
-delayed_proportion = delayed_totals / flight_totals
+delayed_proportion = (delayed_totals / flight_totals) * 100
+delayed_proportion = round(delayed_proportion, 2)
 
 # get minutes delay time in hours
 delay_totals_minutes = flights.groupby("airport_code")["minutes_delayed_total"].sum()
@@ -276,7 +278,6 @@ weather_df
 # of all flights that are delayed by weather at each airport. Describe what you learn from
 # this graph.
 
-# %%
 counter_weather = 0
 proportion_delays_totals = []
 airtport_codes_weather = []
@@ -319,5 +320,13 @@ while counter_weather < len(weather_df["TotalFlights"]):
     proportions_weather_df = pd.DataFrame(weather_proportions_data)
 
     counter_weather += 1
-print(proportions_weather_df)
-# %%
+# print(proportions_weather_df)
+
+propotions_chart = px.bar(
+    proportions_weather_df,
+    x="airport_code",
+    y="proportion",
+    title="Proportion of delays due of weather by airport",
+    labels={"airport_code": "Airport Code", "proportion": "Proportion %"},
+)
+propotions_chart.show()
