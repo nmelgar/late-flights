@@ -190,11 +190,6 @@ flights_month = (
     flights.groupby("month")["minutes_delayed_total"].mean().round(2).reset_index()
 )
 
-# flights_month = flights_month.sort_values(ascending=False)
-
-max_delay = flights_month["minutes_delayed_total"].max()
-min_delay = flights_month["minutes_delayed_total"].min()
-
 fig = px.scatter(
     flights_month,
     x="month",
