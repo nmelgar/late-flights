@@ -37,7 +37,8 @@ For Project 1 the answer to each question should include a chart and a written r
 
 + At least Python 3.10.11
 + Pandas
-+ Altair
++ Plotly
++ Numpy
 
 ## Author
 <hr>
